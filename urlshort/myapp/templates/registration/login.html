@@ -1,0 +1,19 @@
+{% extends "myapp/base.html" %}
+{%  load tailwind_tags %}
+{% tailwind_css %}
+{% block title %}Login{% endblock %}
+{% block content %}
+    <div class="login-container">
+        <h2>Login</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded"><a href="{% url 'home' %}">login</a></button>
+        </form>
+        <div class="register-link">
+            <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+        </div>
+    </div>
+
+    {% endblock %}

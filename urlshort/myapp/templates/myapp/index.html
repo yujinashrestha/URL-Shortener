@@ -1,0 +1,60 @@
+{% extends "myapp/base.html" %}
+{% load tailwind_tags %}
+{% tailwind_css %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-400">
+    <div class="bg-white shadow-2xl rounded-xl p-10 w-full max-w-lg text-center">
+
+        {% if user.is_authenticated %}
+            <!-- LOGGED IN VIEW -->
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-gray-600">Hello, {{ user.username }} 👋</p>
+                <a href="{% url 'login' %}" class="text-red-500 hover:underline">Logout</a>
+            </div>
+
+            <h1 class="text-4xl font-bold text-gray-800 mb-6">
+                Shorten Your URLs Instantly
+            </h1>
+
+            <form method="POST" action="{% url 'shorten_url' %}" class="flex flex-col space-y-4">
+                {% csrf_token %}
+                <input
+                    type="url"
+                    name="original_url"
+                    placeholder="Enter your long URL"
+                    required
+                    class="px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                >
+                <button
+                    type="submit"
+                    class="bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600"
+                >
+                    Shorten URL
+                </button>
+            </form>
+
+            {% if short_url %}
+                <div class="mt-6 bg-gray-100 px-4 py-3 rounded-lg">
+                    <p class="font-medium">Your Short URL:</p>
+                    <a href="{{ short_url }}" target="_blank" class="text-purple-500">
+                        {{ short_url }}
+                    </a>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- NOT LOGGED IN VIEW -->
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">
+                Please login to shorten URLs
+            </h1>
+
+            <a href="{% url 'login' %}"
+               class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600">
+                Login
+            </a>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
