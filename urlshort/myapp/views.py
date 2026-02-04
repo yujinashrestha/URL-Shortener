@@ -4,7 +4,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import redirect
 import uuid
 from .models import link_generator
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 def home(request):
@@ -20,7 +20,7 @@ def register(request):
             return redirect('home')
     else:
         form=UserCreationForm()
-    return render(request, 'myapp/register.html', {'form':form})
+    return render(request, 'registration/register.html', {'form':form})
 
 @login_required 
 def CreateshortLink(request):
@@ -46,8 +46,28 @@ def Loginuser(request):
         if user is not None:
             login(request, user)
             return redirect('home')
-    return render(request, 'myapp/login.html')
+    return render(request, 'registration/login.html')
 
 def logoutuser(request):
     logout(request)
     return redirect('login')
+@login_required
+def dashboard(request):
+    user_links=link_generator.objects.filter(user=request.user).order_by('-created_At')
+    return render(request, 'myapp/dashboard.html', {'links':user_links})
+
+@login_required
+def delete_link(request, pk):
+    if request.method=='POST':
+        link_delete=link_generator.objects.get(pk=pk, user=request.user)
+        link_delete.delete()
+        return JsonResponse({'success': True})
+    
+@login_required
+def edit_link(request, pk):
+    if request.method=='POST':
+        link=link_generator.objects.get(pk=pk, user=request.user)
+        new_url=request.POST.get('original_url')
+        link.link=new_url
+        link.save(update_fields=['link'])
+        return JsonResponse({'success': True, 'new_url': new_url})

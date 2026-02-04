@@ -13,8 +13,8 @@ def encode(num):
     while num:
         num, rem=divmod(num,62)
         arr.append(BASE62[rem])
-        arr.reverse()
-        return ''.join(arr)
+    arr.reverse()
+    return ''.join(arr)
         
 
 # Create your models here.

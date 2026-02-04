@@ -1,0 +1,122 @@
+\{% extends 'myapp/base.html' %}
+{% load tailwind_tags %}
+{% tailwind_css %}
+
+{% block content %}
+<h2 class="text-xl font-bold mb-4">My Short URLs</h2>
+
+<table border="1" cellpadding="10">
+  <tr>
+    <th>Short URL</th>
+    <th>Original URL</th>
+    <th>Created At</th>
+    <th>Clicks</th>
+    <th>Actions</th>
+  </tr>
+
+  {% for link in links %}
+  <tr id="row-{{ link.id }}">
+    <td>{{ request.get_host }}/{{ link.link_id }}</td>
+
+    <td>
+      <!-- View mode -->
+      <span id="text-{{ link.id }}">{{ link.link }}</span>
+
+      <!-- Edit mode -->
+      <input
+        type="text"
+        id="url-{{ link.id }}"
+        value="{{ link.link }}"
+        style="width:300px; display:none;"
+      />
+    </td>
+
+    <td>{{ link.created_At|date:"Y-m-d H:i" }}</td>
+    <td>{{ link.click_count }}</td>
+
+    <td>
+      <button id="edit-btn-{{ link.id }}" onclick="enableEdit('{{ link.id }}')">
+        Edit
+      </button>
+
+      <button
+        id="save-btn-{{ link.id }}"
+        onclick="editLink('{{ link.id }}')"
+        style="display:none;"
+      >
+        Save
+      </button>
+
+      |
+      <button onclick="deleteLink('{{ link.id }}')">Delete</button>
+    </td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="5">No URLs created yet.</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<!-- ================= DELETE ================= -->
+<script>
+function deleteLink(id) {
+  if (!confirm("Delete this link?")) return;
+
+  fetch(`/delete_link/${id}/`, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}"
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById(`row-${id}`).remove();
+    }
+  });
+}
+</script>
+
+<!-- ================= EDIT ================= -->
+<script>
+function enableEdit(id) {
+  document.getElementById(`text-${id}`).style.display = "none";
+  document.getElementById(`url-${id}`).style.display = "inline";
+
+  document.getElementById(`edit-btn-${id}`).style.display = "none";
+  document.getElementById(`save-btn-${id}`).style.display = "inline";
+}
+
+function editLink(id) {
+  const newUrl = document.getElementById(`url-${id}`).value;
+
+  fetch(`/edit_link/${id}/`, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: `original_url=${encodeURIComponent(newUrl)}`
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById(`text-${id}`).innerText = newUrl;
+
+      document.getElementById(`text-${id}`).style.display = "inline";
+      document.getElementById(`url-${id}`).style.display = "none";
+
+      document.getElementById(`edit-btn-${id}`).style.display = "inline";
+      document.getElementById(`save-btn-${id}`).style.display = "none";
+
+      alert("Updated successfully!");
+    } else {
+      alert("Update failed!");
+    }
+  })
+  .catch(err => console.error(err));
+}
+</script>
+
+{% endblock %}
