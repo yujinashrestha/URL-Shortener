@@ -3,12 +3,20 @@
 
   <div class="space-x-4">
     {% if user.is_authenticated %}
+     <a href="{% url 'home' %}" class="text-gray-700 hover:text-blue-600">
+        Home
+      </a>
       <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-blue-600">
         Dashboard
       </a>
-      <a href="{% url 'logout' %}" class="text-red-500 hover:underline">
-        Logout
-      </a>
+      <form method="POST" action="{% url 'logout' %}" class="inline">
+  {% csrf_token %}
+  <button type="submit"
+          class="text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition">
+    Logout
+  </button>
+</form>
+
     {% else %}
       <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600">
         Login
